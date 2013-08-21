@@ -2,10 +2,21 @@
 <html lang="en">
     <head>
         <link rel="stylesheet" type="text/css" href="<%= @prefix %>/bootstrap/bootstrap.css">
-        <link rel="stylesheet" type="text/css" href="<%= @prefix %>/bootstrap/bootstrap.css">
         <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.0/themes/smoothness/jquery-ui.css">
         <link rel="stylesheet" type="text/css" href="<%= @prefix %>/js/jquery-ui-timepicker-addon.css">
+<!-- -->
         <script src="<%= @prefix %>/js/jquery-1.7.2.min.js"></script>
+<!-- -->
+        <script src="<%= @prefix %>/timeserieswidget/flot/jquery.js"></script>
+        <script src="<%= @prefix %>/timeserieswidget/jquery.tswidget.js"></script>
+        <script src="<%= @prefix %>/timeserieswidget/graphite_helpers.js"></script>
+        <script src="<%= @prefix %>/timeserieswidget/flot/jquery.flot.js"></script>
+        <script src="<%= @prefix %>/timeserieswidget/flot/jquery.flot.selection.js"></script>
+        <script src="<%= @prefix %>/timeserieswidget/flot/jquery.flot.time.js"></script>
+        <script src="<%= @prefix %>/timeserieswidget/flot/jquery.flot.stack.js"></script>
+        <script src="<%= @prefix %>/timeserieswidget/jquery.flot.axislabels.js"></script>
+        <link type="text/css" rel="stylesheet" href="<%= @prefix %>/timeserieswidget/tswidget.css">
+
         <script src="<%= @prefix %>/js/jquery-ui-1.10.0.custom.min.js"></script>
         <script src="<%= @prefix %>/js/jquery-ui-timepicker-addon.js"></script>
         <script src="<%= @prefix %>/js/jquery-ui-sliderAccess.js"></script>
@@ -17,6 +28,8 @@
         <script src="<%= @prefix %>/js/bootstrap-tooltip.js"></script>
         <script src="<%= @prefix %>/js/bootstrap-popover.js"></script>
         <script src="<%= @prefix %>/js/bootstrap-typeahead.js"></script>
+
+
         <title><%= @dash_title %></title>
     </head>
     <body>

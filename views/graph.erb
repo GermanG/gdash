@@ -2,8 +2,73 @@
 <% unless omit_link %>
   <%qp="?#{request.env['rack.request.query_string']}" %>
   <a href='<%= [@prefix, params[:category], @params[:dash], 'details', graph[:name], qp].join "/" %>'>
+x</a>
 <% end %>
-<img style="margin: 0 auto;" src='<%= [@dashboard.graphite_render, graph[:graphite][:url]].join "?" %>' title="<%= graph[:graphite][:title] %>" data-content="<%= graph[:graphite][:description] %>">
-<% unless omit_link %>
-  </a>
+<!-- <img style="margin: 0 auto;" src='<%= [@dashboard.graphite_render, graph[:graphite][:url]].join "?" %>' title="<%= graph[:graphite][:title] %>" data-content="<%= graph[:graphite][:description] %>">
+<% md5sum = Digest::MD5.hexdigest( graph[:graphite][:url]) %> -->
+        <div class="chart_container flot" id="chart_container_flot<%= md5sum%>">
+            <div class="chart" id="chart_flot<%= md5sum%>" height="250px" width="500px"></div>
+            <form class="toggler" id="line_stack_form_flot_fancy_stacked<%= md5sum%>"></form>
+            <div class="legend" id="legend_flot_simple<%= md5sum%>"></div>
+        </div>
+        <script language="javascript">
+graph_flot_simple_line<%= md5sum%> = {
+    // name: '<%= graph[:graphite][:alias] %>',
+    graphite_url: '<%= @dashboard.graphite_render %>',
+    from:  '<%= graph[:graphite][:from] %>',
+    until:  '<%= graph[:graphite][:until] %>',
+    height:  '<%= graph[:graphite][:height] %>',
+    width:  '<%= graph[:graphite][:width] %>',
+    targets: [
+<% graph[:graphite][:target].each do |data| %>
+        {
+         target: '<%= data %>'
+        },
 <% end %>
+    ],
+    // title: '<% graph[:graphite][:title] %>',
+    title: '<%= graph[:graphite][:title] %>',
+    vtitle: '<%= graph[:graphite][:vtitle] %>',
+    drawNullAsZero: false,
+    hover_details: true,
+<% if graph[:graphite][:area]  %>
+    state: '<%= graph[:graphite][:area] %>',
+    line_stack_toggle: 'line_stack_form_flot_fancy_stacked<%= md5sum%>',
+<% end %>
+    legend: { container: '#legend_flot_simple<%= md5sum%>', noColumns: 1 },
+};
+            $("#chart_flot<%= md5sum%>").graphiteFlot(graph_flot_simple_line<%= md5sum%>, function(err) { console.log(err); });
+/*
+
+failed attempt to solve 
+https://github.com/vimeo/timeserieswidget/issues/6
+
+            $("#chart_flot<%= md5sum%>").bind('plotselected', function (event, ranges) {
+                // clamp the zooming to prevent eternal zoom
+
+                if (ranges.xaxis.to - ranges.xaxis.from < 0.00001) {
+                    ranges.xaxis.to = ranges.xaxis.from + 0.00001;
+                }
+
+                if (ranges.yaxis.to - ranges.yaxis.from < 0.00001) {
+                    ranges.yaxis.to = ranges.yaxis.from + 0.00001;
+                }
+
+                // do the zooming
+                // zoomed_options = $.buildFlotOptions(this.options);
+                // zoomed_options['xaxis']['min'] = ranges.xaxis.from;
+                // zoomed_options['xaxis']['max'] = ranges.xaxis.to;
+                // zoomed_options['yaxis']['min'] = ranges.yaxis.from;
+                // zoomed_options['yaxis']['max'] = ranges.yaxis.to;
+                console.error ( this.all_targets );
+                plot = $.plot("#chart_flot<%= md5sum%>", this.all_targets, 
+                                $.extend(true, {}, this.options, {
+                                        xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
+                                        yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
+                                })
+                        );
+            });
+*/
+        </script>
+
+
