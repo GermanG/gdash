@@ -123,7 +123,8 @@ class GDash
     end
 
     get '/:category/:dash/details/:name/?*' do
-      options = {}
+      options = {} 
+
       if query_params[:print]
         options[:include_properties] = "print.yml"
         options[:graph_properties] = { 
@@ -131,6 +132,38 @@ class GDash
           :foreground_color => "black"
           }
       end
+
+      params["splat"] = params["splat"].first.split("/")
+
+
+      t_from = t_until = nil
+
+      case params["splat"][0]
+      when 'time'
+        t_from = params["splat"][1] || "-8hour"
+        t_until = params["splat"][2] || "now"
+      when nil
+         if request.cookies["interval"]
+          cookie_date = JSON.parse(request.cookies["interval"], {:symbolize_names => true})
+          t_from = params["splat"][1] || cookie_date[:from]
+          t_until = params["splat"][2] || cookie_date[:until]
+        else
+          t_from ="-8hour"
+          t_until = "now"
+        end
+        # redirect uri_to_interval({:from => t_from, :to => t_until}) if t_from 
+      end
+
+      params[:from] = t_from
+      params[:until] = t_until
+
+      response.set_cookie('interval',
+        :expires => Time.now + 60 * 60 * 24 * 14,
+        :path => "/",
+        :value => { "from" => t_from, "until" => t_until }.to_json
+      )
+
+
       options.merge!(query_params)
 
       if @top_level["#{params[:category]}"].list.include?(params[:dash])
@@ -144,13 +177,13 @@ class GDash
       end
 
       if main_graph = @dashboard.graph_by_name(params[:name], options)
-        @graphs = @intervals.map do |e|
-          new_props = {:from => e[0], :title => "#{main_graph[:graphite].properties[:title]} - #{e[1]}"}
+        # @graphs = @intervals.map do |e|
+          new_props = {:from => options[:from], :title => "#{main_graph[:graphite].properties[:title]} - #{options[:from]}"}
           new_props = main_graph[:graphite].properties.merge new_props
           graph = main_graph.dup
           graph[:graphite] = GraphiteGraph.new(main_graph[:graphite].file, new_props)
-          graph
-        end
+          params[:graph] = graph
+        # end
       else
         @error = "No such graph available"
       end
@@ -276,7 +309,11 @@ class GDash
       end
 
       def uri_to_interval(options)
-        uri = URI([@prefix, params[:category], params[:dash], 'time', h(options[:from]), h(options[:to])].join('/'))
+        if params[:name] 
+          uri = URI([@prefix, params[:category], params[:dash], 'details', params[:name] , 'time', h(options[:from]), h(options[:to])].join('/'))
+        else
+          uri = URI([@prefix, params[:category], params[:dash], 'time', h(options[:from]), h(options[:to])].join('/'))
+        end
         uri.query = request.query_string unless request.query_string.empty? 
         uri.to_s        
       end

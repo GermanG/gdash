@@ -1,15 +1,16 @@
 <% omit_link ||= false %>
+<% url=graph[:graphite][:url] %>
+<% url.gsub!('%5C%5C','%5C') %>
 <% unless omit_link %>
   <%qp="?#{request.env['rack.request.query_string']}" %>
   <a href='<%= [@prefix, params[:category], @params[:dash], 'details', graph[:name], qp].join "/" %>'>
-x</a>
-<% end %>
-<!-- <img style="margin: 0 auto;" src='<%= [@dashboard.graphite_render, graph[:graphite][:url]].join "?" %>' title="<%= graph[:graphite][:title] %>" data-content="<%= graph[:graphite][:description] %>">
-<% md5sum = Digest::MD5.hexdigest( graph[:graphite][:url]) %> -->
+- <img style="margin: 0 auto;" src='<%= [@dashboard.graphite_render, url].join "?" %>' title="<%= graph[:graphite][:title] %>" data-content="<%= graph[:graphite][:description] %>">
+<% else %>
+<% md5sum = Digest::MD5.hexdigest( graph[:graphite][:url]) %>
         <div class="chart_container flot" id="chart_container_flot<%= md5sum%>">
-            <div class="chart" id="chart_flot<%= md5sum%>" height="250px" width="500px"></div>
-            <form class="toggler" id="line_stack_form_flot_fancy_stacked<%= md5sum%>"></form>
+            <div class="chart" id="chart_flot<%= md5sum%>" height="<%= graph[:graphite][:height] %>px" width="<%= graph[:graphite][:width] %>px"></div>
             <div class="legend" id="legend_flot_simple<%= md5sum%>"></div>
+            <form class="toggler" id="line_stack_form_flot_fancy_stacked<%= md5sum%>"></form>
         </div>
         <script language="javascript">
 graph_flot_simple_line<%= md5sum%> = {
@@ -70,5 +71,25 @@ https://github.com/vimeo/timeserieswidget/issues/6
             });
 */
         </script>
+<% end %>
 
+<% unless omit_link %>
+</a>
+<%else%>
+<br/>
+<a href='<%= [@dashboard.graphite_render, url].join "?" %>'>graphite image</a>
+<br/>
+  <%
+    grafloturi = @graphite_base + '/graphlot/?from=' + graph[:graphite][:from] + '&until='  + graph[:graphite][:until] 
+      graph[:graphite][:target].each do |data| 
+       clean_data = data
+       clean_data.gsub!("\\\\",'\\') %> 
+       <%= clean_data %><br/>
 
+      
+  <% 
+   grafloturi << '&target=' + clean_data   
+end %>
+<a href='<%= grafloturi %>'>graflot link</a><br/>
+<a href='javascript:url=prompt("Enter Url");if (url){content.Composer.loadMyGraph("temp", decodeURIComponent(url));};'>Graphite Importer</a> is a bookmarket, drag and drop it in your bookmarks bar <br/>
+<% end %>

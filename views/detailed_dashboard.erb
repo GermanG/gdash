@@ -5,22 +5,18 @@
   <div class="span6">
 <h1><%= @dashboard.name %>&nbsp;<small><%= @dashboard.description %></small></h1>
   </div>
+  <div class="span8">
+<%= erb :_interval_filter_detailed, :layout => false unless @interval_filters.empty? %>
+  </div>
+ 
 </div>
   
 <% span=12/@graph_columns %>
 <table align=center>
 <tr>
-<% @graphs.each_with_index do |graph,i| %>
-  <% if graph %>
-    <% if i>0 and i%@graph_columns==0 %>
-       </tr>
-       <tr>
-    <%end%>
         <td>
-          <%= erb(:graph, :locals => { :graph => graph, :omit_link => true }) %>
+          <%= erb(:graph, :locals => { :graph => @params[:graph], :omit_link => true }) %>
         </td>
-  <% end %>
-<% end %>
 </tr>
 </table>
 <script>
