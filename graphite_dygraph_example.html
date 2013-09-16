@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+      <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7; IE=EmulateIE9">
+        <title>Graphite to Dygraph</title>
+        <style type="text/css">
+          #graph_div { border: 1px solid black; height: 500px; width: 100%; }
+          #in_url    { width: 100%; }
+          #url_input { width: 90%; }
+        </style>
+        <script type="text/javascript" src="dygraph-combined.js"></script>
+        <script type="text/javascript" src="//code.jquery.com/jquery.min.js"></script>
+        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+        <script type="text/javascript">
+     
+        var g1 = {};
+     
+        var draw = function(){
+          $("#graph_div").html('<img src="loading.gif" />');
+          var url = $("#url_input").val() + '&format=json_dygraph';
+          $.getJSON(url, function(response){
+            for(i in response.data){ response.data[i][0] = new Date(response.data[i][0]); }
+            $("#graph_div").html('');
+            g1 = new Dygraph(
+              document.getElementById("graph_div"),
+              response.data,
+              { rollPeriod: 1,
+                showRoller: true,
+                labels: response.labels,
+                legend: 'always',
+                labelsDivWidth: 'auto',
+                labelsSeparateLines: true,
+                labelsDivStyles: {
+                  'backgroundColor': 'white',
+                  'opacity' : '0.9',
+                  'padding' : '3px',
+                  'border' : '1px solid #AAA',
+                  'font-size' : '0.8em',
+                  'position' : 'absolute',
+                  'top' : '40px',
+                  'left' : '50px',
+                }, // end labelsDivStyles
+                drawCallback: function(g) {
+                  $("#graph_div .dygraph-legend").draggable();
+                }
+              } //end 3rd dygraph constructor argument
+            ); //end dygraph constructor
+          }); //end ajax
+        }; //end draw function
+     
+        $(document).ready(function(){
+          window.onresize = resize;
+          resize();
+          $("#go").click(function(){
+            window.location = "/dy/?" + $("#url_input").val();
+          });
+          $("#url_input").on('keydown', function(e){
+            if (e.which == 13){
+              window.location = "/dy/?" + $("#url_input").val();
+            }
+          });
+          if ( window.location.search.substring(1) ){
+            $("#url_input").val(window.location.search.substring(1));
+          }
+          else{
+            $("#url_input").val("http://graphite.graph01ea1/render/?target=carbon.agents.graphite-a.cpuUsage");
+          }
+          draw();
+        });
+     
+        var resize = function(){
+          $("#graph_div").height( window.innerHeight - 45 );
+          $("#url_input").width( $("body").width() - 200 );
+        };
+     
+        var update = function(){
+          var url = $("#url_input").val() + '&format=json_dygraph';
+          $.getJSON(url, function(response){
+            for(i in response.data){ response.data[i][0] = new Date(response.data[i][0]); }
+            g1.updateOptions({'file': response.data })
+          });
+          if ( $('#update').is(':checked') ){
+            setTimeout('update()', 1000);
+          }
+        }
+     
+        </script>
+      </head>
+      <body>
+        <div id="in_url">
+          <button id="go">Go!</button>
+          <input id="url_input" value="" />
+          | Auto-update: <input type="checkbox" id="update" onchange='update()' />
+        </div>
+        <div id="graph_div"></div>
+      </body>
+</html>

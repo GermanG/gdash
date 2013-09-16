@@ -76,7 +76,23 @@ https://github.com/vimeo/timeserieswidget/issues/6
 <% unless omit_link %>
 </a>
 <%else%>
+<script type="text/javascript">
+function showStuff(text, link) {
+    if ( document.getElementById(text).style.display == 'block' ) {
+       document.getElementById(text).style.display = 'none' 
+       document.getElementById(link).style.display = 'block' 
+     }else{
+       document.getElementById(text).style.display = 'block' 
+       document.getElementById(link).style.display = 'none' 
+     }
+
+}
+</script>
+<span id="link1">
 <br/>
+<a href="#" onclick="showStuff('text1', 'link1'); return false;">Show Links</a>
+</span>
+<span id="text1" style="display: none;">
 <a href='<%= [@dashboard.graphite_render, url].join "?" %>'>graphite image</a>
 <br/>
   <%
@@ -92,4 +108,5 @@ https://github.com/vimeo/timeserieswidget/issues/6
 end %>
 <a href='<%= grafloturi %>'>graflot link</a><br/>
 <a href='javascript:url=prompt("Enter Url");if (url){content.Composer.loadMyGraph("temp", decodeURIComponent(url));};'>Graphite Importer</a> is a bookmarket, drag and drop it in your bookmarks bar <br/>
+</span>
 <% end %>
